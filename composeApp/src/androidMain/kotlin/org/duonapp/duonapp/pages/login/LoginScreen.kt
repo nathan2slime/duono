@@ -24,7 +24,10 @@ import androidx.compose.ui.unit.sp
 import org.duonapp.duonapp.global.DuoFontFamily
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    state: LoginState,
+    onIntent: (LoginIntent) -> Unit
+) {
     Column(
         modifier = Modifier
             .background(
@@ -36,7 +39,6 @@ fun LoginScreen() {
                 )
             )
             .fillMaxSize(),
-
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
@@ -58,22 +60,45 @@ fun LoginScreen() {
                     Column(Modifier.height(35.dp)) {}
                     Column {
                         OutlinedTextField(
-                            value = "",
+                            value = state.email,
+                            onValueChange = {
+                                onIntent(LoginIntent.EmailChanged(it))
+                            },
                             label = { Text(text = "Email") },
-                            onValueChange = { },
+                            isError = state.emailError != null,
                             modifier = Modifier.fillMaxWidth()
                         )
+                        state.emailError?.let {
+                            Text(
+                                it,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                         Column(Modifier.height(10.dp)) {}
                         OutlinedTextField(
-                            value = "",
+                            value = state.password,
                             label = { Text(text = "Password") },
                             modifier = Modifier.fillMaxWidth(),
+                            isError = state.passwordError != null,
                             visualTransformation = PasswordVisualTransformation(),
-                            onValueChange = { })
+                            onValueChange = {
+                                onIntent(LoginIntent.PasswordChanged(it))
+                            })
+                        state.passwordError?.let {
+                            Text(
+                                it,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
+
                     Column(Modifier.height(35.dp)) {}
                     Button(
-                        onClick = {}, modifier = Modifier
+                        onClick = { onIntent(LoginIntent.Submit) },
+                        enabled = state.isFormValid && !state.isLoading,
+                        modifier = Modifier
                             .fillMaxWidth()
                     ) {
                         Text(
